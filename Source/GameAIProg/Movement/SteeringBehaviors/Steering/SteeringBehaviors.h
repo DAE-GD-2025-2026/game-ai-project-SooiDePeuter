@@ -15,13 +15,14 @@ public:
 	// Override to implement your own behavior
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) = 0;
 
-	void SetTarget(const FTargetData& NewTarget) {  = NewTarget; }
+	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
 	
 	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
 	T* As()
 	{ return static_cast<T*>(this); }
 
 	FVector2D PredictTarget(const ASteeringAgent& agent, const FTargetData& target);
+	FVector2D PredictTarget(const ASteeringAgent& agent, float time);
 
 protected:
 	FTargetData Target;
@@ -78,6 +79,15 @@ class Evade : public ISteeringBehavior
 public:
 	Evade() = default;
 	virtual ~Evade() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Wander : public ISteeringBehavior
+{
+public:
+	Wander() = default;
+	virtual ~Wander() = default;
 
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
 };

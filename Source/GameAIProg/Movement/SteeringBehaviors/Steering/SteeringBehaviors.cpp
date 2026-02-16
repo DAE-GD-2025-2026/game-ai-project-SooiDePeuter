@@ -1,13 +1,24 @@
 #include "SteeringBehaviors.h"
 #include "GameAIProg/Movement/SteeringBehaviors/SteeringAgent.h"
 
+//predict target of another actor
 FVector2D ISteeringBehavior::PredictTarget(const ASteeringAgent& agent, const FTargetData& target)
 {
 	//calculate time to reach target
-	const float time{ (agent.GetPosition() - Target.Position).Length() / agent.GetMaxLinearSpeed() };
+	const float time{ float((agent.GetPosition() - Target.Position).Length() / agent.GetMaxLinearSpeed()) };
 
 	//calculate predicted position
 	const FVector2D predictPosition{ Target.Position + time * Target.LinearVelocity };
+
+	return predictPosition;
+}
+
+//predict target of self
+FVector2D ISteeringBehavior::PredictTarget(const ASteeringAgent& agent, float time)
+{
+	//calculate predicted position
+	const FVector2D predictPosition{ agent.GetPosition().X + time * agent.GetVelocity().X,
+									 agent.GetPosition().Y + time * agent.GetVelocity().Y, };
 
 	return predictPosition;
 }
@@ -64,6 +75,8 @@ SteeringOutput Arrive::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	}
 
 	//draw debug lines
+	
+
 
 	return result;
 }
@@ -74,7 +87,7 @@ SteeringOutput Face::CalculateSteering(float DeltaTime, ASteeringAgent& Agent)
 	SteeringOutput result{};
 
 	const FVector2D targetDirection { Target.Position - Agent.GetPosition() };
-	const float actorAngle{ FMath::DegreesToRadians(Agent.GetActorRotation().Yaw) };
+	const float actorAngle{ float(FMath::DegreesToRadians(Agent.GetActorRotation().Yaw)) };
 	const float rotationSpeed{ 5 };
 	
 	//rotate over the smallest angle
@@ -125,6 +138,28 @@ SteeringOutput Evade::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	{
 		result.LinearVelocity = agent.GetPosition() - PredictTarget(agent, Target);
 	}
+
+	return result;
+}
+
+//Wander
+SteeringOutput Wander::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
+{
+	//make an output object
+	SteeringOutput result;
+
+	//calculate walking circle
+	const FVector2D center{ PredictTarget(agent, 1.f) };
+	const float radius{float((agent.GetPosition() - center).Length())};
+
+	//calculate random angle
+	const float angle{ 0.25f * float(rand() % 8 * PI) };
+
+	//calculate point on circle
+	const FVector2D target{ center.X + radius * cos(angle), center.Y + radius * sin(angle) };
+
+	//set Velocity
+	result.LinearVelocity = target - agent.GetPosition();
 
 	return result;
 }
