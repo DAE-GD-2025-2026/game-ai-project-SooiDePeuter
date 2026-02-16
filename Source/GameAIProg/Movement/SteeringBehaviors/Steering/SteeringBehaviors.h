@@ -13,16 +13,71 @@ public:
 	virtual ~ISteeringBehavior() = default;
 
 	// Override to implement your own behavior
-	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) = 0;
 
-	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
+	void SetTarget(const FTargetData& NewTarget) {  = NewTarget; }
 	
 	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
 	T* As()
 	{ return static_cast<T*>(this); }
 
+	FVector2D PredictTarget(const ASteeringAgent& agent, const FTargetData& target);
+
 protected:
 	FTargetData Target;
+
 };
 
-// Your own SteeringBehaviors should follow here...
+class Seek: public ISteeringBehavior
+{
+public:
+	Seek() = default;
+	virtual ~Seek() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Flee : public ISteeringBehavior
+{
+public:
+	Flee() = default;
+	virtual ~Flee() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Arrive : public ISteeringBehavior
+{
+public:
+	Arrive() = default;
+	virtual ~Arrive() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Face : public ISteeringBehavior
+{
+public:
+	Face() = default;
+	virtual ~Face() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Pursuit : public ISteeringBehavior
+{
+public:
+	Pursuit() = default;
+	virtual ~Pursuit() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};
+
+class Evade : public ISteeringBehavior
+{
+public:
+	Evade() = default;
+	virtual ~Evade() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+};

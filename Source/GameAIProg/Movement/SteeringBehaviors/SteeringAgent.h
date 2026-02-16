@@ -70,4 +70,9 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	void SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior);
+
+	void ApplyAngularVelocity(float AngularVelocity);
+
+	//unmanipulated max speed
+	const float maxLinearSpeed{ 1000.f };
 };
