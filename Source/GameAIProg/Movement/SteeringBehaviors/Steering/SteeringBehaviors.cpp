@@ -129,6 +129,19 @@ SteeringOutput Evade::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	//make an output object
 	SteeringOutput result;
 
+	//hardcode evade radius
+	float evadeRadius{ 250.f };
+
+	//implement evade radius
+	if (evadeRadius > (agent.GetPosition() - Target.Position).Length())
+	{
+		result.IsValid = true;
+	}
+	else 
+	{
+		result.IsValid = false;
+	}
+
 	//set direction if target is immobile VS mobile
 	if (Target.LinearVelocity.Length() < FLT_EPSILON)
 	{

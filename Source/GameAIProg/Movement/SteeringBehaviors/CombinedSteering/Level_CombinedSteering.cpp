@@ -1,7 +1,7 @@
 ﻿#include "Level_CombinedSteering.h"
 
 #include "imgui.h"
-
+#include <vector>
 
 // Sets default values
 ALevel_CombinedSteering::ALevel_CombinedSteering()
@@ -15,6 +15,21 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//place agents
+	DrunkAgent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{ 700,700,90 }, FRotator::ZeroRotator);
+	SoberAgent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{ -700,-700,90 }, FRotator::ZeroRotator);
+
+	//make the WeightedBehavior struct ready
+	std::vector<BlendedSteering::WeightedBehavior> drunkBehaviour{};
+	drunkBehaviour.reserve(2);
+	drunkBehaviour.emplace_back(BlendedSteering::WeightedBehavior{ new Seek, 0.5f });
+	drunkBehaviour.emplace_back(BlendedSteering::WeightedBehavior{ new Wander, 0.5f });
+
+	//apply the WeightedBehavior struct
+	DrunkAgent->SetSteeringBehavior(new BlendedSteering{ drunkBehaviour });
+
+	//initialize the sober agent
+	SoberAgent->SetSteeringBehavior(new PrioritySteering({ new Evade{}, new Wander{} }));
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
@@ -67,7 +82,7 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 	
 		if (ImGui::Checkbox("Debug Rendering", &CanDebugRender))
 		{
-   // TODO: Handle the debug rendering of your agents here :)
+			// TODO: Handle the debug rendering of your agents here :)
 		}
 		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
 		if (TrimWorld->bShouldTrimWorld)
@@ -85,18 +100,24 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 
 
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-		// 	pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-		// 	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
-		//
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		// pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		// [this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+		//ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+		//pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+		//[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		
+		//ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+		//pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+		//[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 	
 		//End
 		ImGui::End();
 	}
 #pragma endregion
 
-	// Combined Steering Update
+	UpdateAgents(DeltaTime);
+}
+
+void ALevel_CombinedSteering::UpdateAgents(float deltaTime)
+{
+	DrunkAgent->GetSteeringBehavior()->CalculateSteering(deltaTime, *DrunkAgent);
+	SoberAgent->GetSteeringBehavior()->CalculateSteering(deltaTime, *SoberAgent);
 }

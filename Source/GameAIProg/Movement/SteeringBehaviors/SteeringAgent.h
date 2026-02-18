@@ -69,6 +69,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	ISteeringBehavior* GetSteeringBehavior();
 	void SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior);
 
 	void ApplyAngularVelocity(float AngularVelocity);

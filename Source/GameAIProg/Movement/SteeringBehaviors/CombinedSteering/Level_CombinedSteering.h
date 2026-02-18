@@ -20,6 +20,7 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void UpdateAgents(float deltaTime);
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,6 +32,9 @@ private:
 	//Datamembers
 	bool UseMouseTarget = false;
 	bool CanDebugRender = false;
+
+	ASteeringAgent* DrunkAgent{ nullptr };
+	ASteeringAgent* SoberAgent{ nullptr };
 
 	
 };
