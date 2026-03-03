@@ -133,14 +133,7 @@ SteeringOutput Evade::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	float evadeRadius{ 250.f };
 
 	//implement evade radius
-	if (evadeRadius > (agent.GetPosition() - Target.Position).Length())
-	{
-		result.IsValid = true;
-	}
-	else 
-	{
-		result.IsValid = false;
-	}
+	result.IsValid = (evadeRadius > (agent.GetPosition() - Target.Position).Length());
 
 	//set direction if target is immobile VS mobile
 	if (Target.LinearVelocity.Length() < FLT_EPSILON)
@@ -163,7 +156,11 @@ SteeringOutput Wander::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 
 	//calculate walking circle
 	const FVector2D center{ PredictTarget(agent, 1.f) };
-	const float radius{float((agent.GetPosition() - center).Length())};
+	float radius{float((agent.GetPosition() - center).Length())};
+	if (radius < 1.f)
+	{
+		radius = 1.f;
+	}
 
 	//calculate random angle
 	const float angle{ 0.25f * float(rand() % 8 * PI) };

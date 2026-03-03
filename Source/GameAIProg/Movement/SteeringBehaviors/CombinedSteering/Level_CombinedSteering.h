@@ -33,6 +33,7 @@ private:
 	bool UseMouseTarget = false;
 	bool CanDebugRender = false;
 
+	BlendedSteering* pBlendedSteering{};
 	ASteeringAgent* DrunkAgent{ nullptr };
 	ASteeringAgent* SoberAgent{ nullptr };
 

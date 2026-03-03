@@ -26,16 +26,22 @@ void ALevel_CombinedSteering::BeginPlay()
 	drunkBehaviour.emplace_back(BlendedSteering::WeightedBehavior{ new Wander, 0.5f });
 
 	//apply the WeightedBehavior struct
-	DrunkAgent->SetSteeringBehavior(new BlendedSteering{ drunkBehaviour });
+	pBlendedSteering = new BlendedSteering{ drunkBehaviour };
+	DrunkAgent->SetSteeringBehavior(pBlendedSteering);
+
+	//make the soberBehaviour vector ready
+	std::vector<ISteeringBehavior*> soberBehaviour{};
+	soberBehaviour.reserve(2);
+	soberBehaviour.emplace_back(new Evade());
+	soberBehaviour.emplace_back(new Wander());
 
 	//initialize the sober agent
-	SoberAgent->SetSteeringBehavior(new PrioritySteering({ new Evade{}, new Wander{} }));
+	SoberAgent->SetSteeringBehavior(new PrioritySteering(soberBehaviour));
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
 {
 	Super::BeginDestroy();
-
 }
 
 // Called every frame
@@ -100,13 +106,13 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 
 
-		//ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-		//pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-		//[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+		pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+		[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
 		
-		//ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		//pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		//[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+		pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+		[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 	
 		//End
 		ImGui::End();
