@@ -52,7 +52,6 @@ SteeringOutput Arrive::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 {
 	//hardcode arrive radiuses
 	const float slowRadius{2000.f};
-	const float targetRadius{200.0f};
 
 	//make an output object
 	SteeringOutput result;
@@ -61,7 +60,7 @@ SteeringOutput Arrive::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	result.LinearVelocity = Target.Position - agent.GetPosition();
 
 	//set max speed
-	if ((Target.Position - agent.GetPosition()).Length() < targetRadius)
+	if ((Target.Position - agent.GetPosition()).Length() < m_TargetRadius)
 	{
 		agent.SetMaxLinearSpeed(0);
 	}
@@ -73,12 +72,13 @@ SteeringOutput Arrive::CalculateSteering(float DeltaTime, ASteeringAgent& agent)
 	{
 		agent.SetMaxLinearSpeed(agent.maxLinearSpeed);
 	}
-
-	//draw debug lines
 	
-
-
 	return result;
+}
+
+void Arrive::SetTargetRadius(float radius)
+{
+	m_TargetRadius = radius;
 }
 
 //FACE

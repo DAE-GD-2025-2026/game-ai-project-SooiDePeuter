@@ -54,6 +54,10 @@ public:
 	virtual ~Arrive() = default;
 
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& agent) override;
+	void SetTargetRadius(float radius);
+	
+private:
+	float m_TargetRadius{200};
 };
 
 class Face : public ISteeringBehavior
