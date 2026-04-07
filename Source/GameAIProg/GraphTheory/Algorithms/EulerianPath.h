@@ -33,16 +33,37 @@ namespace GameAI
 
 	inline Eulerianity EulerianPath::IsEulerian() const
 	{
-		// TODO If the graph is not connected, there can be no Eulerian Trail
-
-		// TODO Count nodes with odd degree 
-
-		// TODO A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
-
-		// TODO A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
-		// TODO An Euler trail can be made, but only starting and ending in these 2 nodes
-
-		// TODO A connected graph with no odd nodes is Eulerian
+		
+		// If the graph is not connected, there can be no Eulerian Trail
+		if (!IsConnected())
+		{
+			return Eulerianity::notEulerian;
+		}
+		
+		// Count nodes with odd degree 
+		std::vector<Node*> Nodes = m_pGraph->GetActiveNodes();
+		int TotalOddNodes{};
+		for (int index{}; index < Nodes.size(); ++index)
+		{
+			std::vector<Connection*> Connections = m_pGraph->FindConnectionsFrom(index);
+			if (Connections.size() % 2 == 1)
+			{
+				TotalOddNodes++;
+			}
+		}
+		// determine euleranity
+		if (TotalOddNodes == 1 || TotalOddNodes >= 3)
+		{
+			return Eulerianity::notEulerian;
+		}
+		else if (TotalOddNodes == 0)
+		{
+			return Eulerianity::eulerian;
+		}
+		else if (TotalOddNodes == 2)
+		{
+			return Eulerianity::semiEulerian;
+		}
 		
 		return Eulerianity::notEulerian;
 	}
@@ -55,11 +76,43 @@ namespace GameAI
 		std::vector<Node*> Nodes = graphCopy.GetActiveNodes();
 		int currentNodeId{ Graphs::InvalidNodeId };
 		
-		// TODO Check if there can be an Euler path
-		// TODO If this graph is not eulerian, return the empty path
+		// If this graph is not eulerian, return the empty path
+		if (eulerianity == Eulerianity::notEulerian)
+		{
+			return Path;
+		}
 		
-		// TODO Start algorithm loop
+		if (eulerianity == Eulerianity::eulerian)
+		{
+			currentNodeId = 0;
+		}
+		else if (eulerianity == Eulerianity::semiEulerian)
+		{
+			//find index with odd number of connections
+			for (int index{}; index < Nodes.size(); ++index)
+			{
+				if (graphCopy.FindConnectionsFrom(index).size() % 2 == 1)
+				{
+					currentNodeId = index;
+					break;
+				}
+			}
+		}
+		
+		// Start algorithm loop
 		std::stack<int> nodeStack;
+		
+		while (graphCopy.FindConnectionsFrom(currentNodeId).size() != 0)
+		{
+			//add node to the path
+			Path.push_back(m_pGraph->GetActiveNodes()[currentNodeId]);
+			//set id to next node
+			currentNodeId = graphCopy.FindConnectionsFrom(currentNodeId)[0]->GetToId();
+			//remove connection between stored and next node
+			graphCopy.RemoveConnection(Path[Path.size() - 1]->GetId(), currentNodeId);
+		}
+		//add the last new node to the path
+		Path.push_back(m_pGraph->GetActiveNodes()[currentNodeId]);
 
 		std::reverse(Path.begin(), Path.end());
 		return Path;
@@ -67,11 +120,21 @@ namespace GameAI
 
 	inline void EulerianPath::VisitAllNodesDFS(const std::vector<Node*>& Nodes, std::vector<bool>& visited, int startIndex ) const
 	{
-		// TODO Mark the visited node
+		// Mark the visited node
+		visited[startIndex] = true;
 
-		// TODO Ask the graph for the connections from that node
-		// TODO recursively visit any valid connected nodes that were not visited before
-		// TODO Tip: use an index-based for-loop to find the correct index
+		// Ask the graph for the connections from that node
+		std::vector<Connection*> Connections = m_pGraph->FindConnectionsFrom(startIndex);
+		
+		// recursively visit any valid connected nodes that were not visited before
+		for (Connection* connection : Connections)
+		{
+			if (visited[connection->GetToId()] == false)
+			{
+				VisitAllNodesDFS(Nodes, visited, connection->GetToId());
+			}
+		}
+		
 	}
 
 	inline bool EulerianPath::IsConnected() const
@@ -79,11 +142,25 @@ namespace GameAI
 		std::vector<Node*> Nodes = m_pGraph->GetActiveNodes();
 		if (Nodes.size() == 0)
 			return false;
-
-		// TODO choose a starting node
 		
-		// TODO start a depth-first-search traversal from the node that has at least one connection
+		std::vector<bool> VisitedNodes;
+		VisitedNodes.reserve(Nodes.size());
+		for (int index{}; index < Nodes.size(); ++index)
+		{
+			VisitedNodes.emplace_back(false);
+		}
 		
-		// TODO if a node was never visited, this graph is not connected
+		// start a depth-first-search traversal from the node that has at least one connection
+		VisitAllNodesDFS(Nodes, VisitedNodes, 0);
+		
+		// if a node was never visited, this graph is not connected
+		for (bool Node : VisitedNodes)
+		{
+			if (Node == false)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }
