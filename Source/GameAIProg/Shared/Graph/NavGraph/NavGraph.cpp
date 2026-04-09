@@ -67,12 +67,12 @@ void GameAI::NavGraph::CreateNavigationGraph()
 		if (triangleCount >= 2)
 		{
 			const FVector2D Position{Line->GetP1(*pNavPoly) * 0.5 + Line->GetP2(*pNavPoly) * 0.5};
-			this->AddNode(std::make_unique<NavGraphNode>{Node{Position}, index});
+			this->AddNode(std::make_unique<NavGraphNode>(Position, index));
 		}
 	}
 
 	// Create connections now that every node is created
-	for (auto const Triangle& Triangle : pNavPoly->GetTriangles())
+	for (const TriPolygon::Triangle& Triangle : pNavPoly->GetTriangles())
 	{
 		std::array<TriPolygon::Edge, 3> Edges = Triangle.GetEdges();
 		
@@ -97,13 +97,13 @@ void GameAI::NavGraph::CreateNavigationGraph()
 		//make connections and set their weight
 		if (NodeIndexes.size() == 2)
 		{
-			this->AddConnection(std::make_unique<Connection>{NodeIndexes[0], NodeIndexes[1]});
+			this->AddConnection(std::make_unique<Connection>(NodeIndexes[0], NodeIndexes[1]));
 		}
 		else if (NodeIndexes.size() == 3)
 		{
-			this->AddConnection(std::make_unique<Connection>{NodeIndexes[0], NodeIndexes[1]});
-			this->AddConnection(std::make_unique<Connection>{NodeIndexes[1], NodeIndexes[2]});
-			this->AddConnection(std::make_unique<Connection>{NodeIndexes[2], NodeIndexes[0]});
+			this->AddConnection(std::make_unique<Connection>(NodeIndexes[0], NodeIndexes[1]));
+			this->AddConnection(std::make_unique<Connection>(NodeIndexes[1], NodeIndexes[2]));
+			this->AddConnection(std::make_unique<Connection>(NodeIndexes[2], NodeIndexes[0]));
 		}
 	}
 	
