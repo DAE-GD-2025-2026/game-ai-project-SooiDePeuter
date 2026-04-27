@@ -108,7 +108,7 @@ void ALevel_PathfindingAStar::CalculatePath()
 	{
 		//Select (uncomment) BFS Pathfinding or A* Pathfinding
 		//BFS pathfinder = BFS(TerrainGraph);
-		AStar pathfinder = AStar(TerrainGraph, HeuristicFunction);
+		BFS pathfinder = BFS(TerrainGraph);
 		TerrainNode* const startNode = TerrainGraph->GetNodeAs<TerrainNode>(PathStartNodeId);
 		TerrainNode* const endNode = TerrainGraph->GetNodeAs<TerrainNode>(PathEndNodeId);
 
